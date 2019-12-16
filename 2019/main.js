@@ -4,3 +4,5 @@ require("./solutions/3");
 require("./solutions/4");
 require("./solutions/5");
 require("./solutions/6");
+require("./solutions/7");
+require("./solutions/8");
