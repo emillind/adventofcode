@@ -1,11 +1,16 @@
+const parseMode = (mode, param, memory) => {
+  if (isPosition(mode)) {
+    return parseInt(memory[param]);
+  } else if (isImmediate(mode)) {
+    return parseInt(param);
+  } else if (isRelative(mode)) {
+    return 0;
+  }
+};
+
 const processAdd = (firstParam, secondParam, thirdParam, memory, modes) => {
-  const firstValue =
-    isPosition(modes[0]) && parseInt(firstParam) > 0
-      ? parseInt(memory[firstParam])
-      : parseInt(firstParam);
-  const secondValue = isPosition(modes[1])
-    ? parseInt(memory[secondParam])
-    : parseInt(secondParam);
+  const firstValue = parseMode(modes[0], firstParam, memory);
+  const secondValue = parseMode(modes[1], secondParam, memory);
   // console.log("Add params:", firstParam, secondParam, thirdParam);
   // console.log("Values:", firstValue, secondValue);
   // console.log("Setting index", thirdParam, "to", firstValue + secondValue);
@@ -20,13 +25,8 @@ const processMultiply = (
   memory,
   modes
 ) => {
-  const firstValue =
-    isPosition(modes[0]) && parseInt(firstParam) > 0
-      ? parseInt(memory[firstParam])
-      : parseInt(firstParam);
-  const secondValue = isPosition(modes[1])
-    ? parseInt(memory[secondParam])
-    : parseInt(secondParam);
+  const firstValue = parseMode(modes[0], firstParam, memory);
+  const secondValue = parseMode(modes[1], secondParam, memory);
   // console.log("Multiply params:", firstParam, secondParam, thirdParam);
   // console.log("Values:", firstValue, secondValue);
   // console.log("Setting index", thirdParam, "to", firstValue * secondValue);
@@ -43,7 +43,7 @@ const processInput = (value, index, memory) => {
 
 // outputs the value of its only parameter.
 const processOutput = (param, memory, mode) => {
-  const output = isPosition(mode) ? memory[param] : param;
+  const output = parseMode(mode, param, memory);
   console.log("=====");
   console.log("Output:", output);
   console.log("=====");
@@ -52,10 +52,9 @@ const processOutput = (param, memory, mode) => {
 
 // if the first parameter is non-zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
 const processJumpIfTrue = (firstParam, secondParam, memory, mode, pointer) => {
-  const newPointer = isPosition(mode[1]) ? memory[secondParam] : secondParam;
-  const value = isPosition(mode[0]) ? memory[firstParam] : firstParam;
-  const returnPointer =
-    parseInt(value) !== 0 ? parseInt(newPointer) : pointer + 3;
+  const newPointer = parseMode(mode[1], secondParam, memory);
+  const value = parseMode(mode[0], firstParam, memory);
+  const returnPointer = value !== 0 ? newPointer : pointer + 3;
   // console.log(
   //   "Jump if true params:",
   //   firstParam,
@@ -70,10 +69,9 @@ const processJumpIfTrue = (firstParam, secondParam, memory, mode, pointer) => {
 
 // if the first parameter is zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
 const processJumpIfFalse = (firstParam, secondParam, memory, mode, pointer) => {
-  const newPointer = isPosition(mode[1]) ? memory[secondParam] : secondParam;
-  const value = isPosition(mode[0]) ? memory[firstParam] : firstParam;
-  const returnPointer =
-    parseInt(value) === 0 ? parseInt(newPointer) : pointer + 3;
+  const newPointer = parseMode(mode[1], secondParam, memory);
+  const value = parseMode(mode[0], firstParam, memory);
+  const returnPointer = value === 0 ? newPointer : pointer + 3;
   // console.log(
   //   "Jump if false params:",
   //   firstParam,
@@ -94,13 +92,8 @@ const processLessThan = (
   memory,
   modes
 ) => {
-  const firstValue =
-    isPosition(modes[0]) && parseInt(firstParam) > 0
-      ? parseInt(memory[firstParam])
-      : parseInt(firstParam);
-  const secondValue = isPosition(modes[1])
-    ? parseInt(memory[secondParam])
-    : parseInt(secondParam);
+  const firstValue = parseMode(modes[0], firstParam, memory);
+  const secondValue = parseMode(modes[0], secondParam, memory);
   memory[thirdParam] = firstValue < secondValue ? 1 : 0;
   //console.log("Equals params:", firstParam, secondParam, thirdParam);
   //console.log("Values:", firstValue, secondValue);
@@ -110,13 +103,8 @@ const processLessThan = (
 
 // if the first parameter is equal to the second parameter, it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
 const processEquals = (firstParam, secondParam, thirdParam, memory, modes) => {
-  const firstValue =
-    isPosition(modes[0]) && parseInt(firstParam) > 0
-      ? parseInt(memory[firstParam])
-      : parseInt(firstParam);
-  const secondValue = isPosition(modes[1])
-    ? parseInt(memory[secondParam])
-    : parseInt(secondParam);
+  const firstValue = parseMode(modes[0], firstParam, memory);
+  const secondValue = parseMode(modes[1], secondParam, memory);
   memory[thirdParam] = firstValue === secondValue ? 1 : 0;
   //console.log("Equals params:", firstParam, secondParam, thirdParam);
   //console.log("Values:", firstValue, secondValue);
@@ -127,6 +115,8 @@ const processEquals = (firstParam, secondParam, thirdParam, memory, modes) => {
 const isPosition = mode => mode === 0;
 
 const isImmediate = mode => mode === 1;
+
+const isRelative = mode => mode === 2;
 
 const isEquals = opcode => opcode === 8;
 
