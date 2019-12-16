@@ -6,3 +6,4 @@ require("./solutions/5");
 require("./solutions/6");
 require("./solutions/7");
 require("./solutions/8");
+require("./solutions/9");

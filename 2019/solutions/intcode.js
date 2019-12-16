@@ -1,20 +1,60 @@
-const parseMode = (mode, param, memory) => {
+const log = false;
+
+const parseWriteMode = (mode, param, relativeBase) => {
+  return isRelative(mode) ? parseInt(param) + relativeBase : parseInt(param);
+};
+
+const parseMode = (mode, param, memory, relativeBase) => {
   if (isPosition(mode)) {
+    if (log)
+      console.log(
+        "Parsing position mode of param",
+        param,
+        "to",
+        parseInt(memory[param])
+      );
     return parseInt(memory[param]);
   } else if (isImmediate(mode)) {
+    if (log)
+      console.log(
+        "Parsing immediate mode of param",
+        param,
+        "to",
+        parseInt(param)
+      );
     return parseInt(param);
   } else if (isRelative(mode)) {
-    return 0;
+    if (log)
+      console.log(
+        "Parsing relative mode of param",
+        param,
+        "with base",
+        relativeBase,
+        "to",
+        parseInt(memory[parseInt(param) + relativeBase])
+      );
+    return parseInt(memory[parseInt(param) + relativeBase]);
   }
 };
 
-const processAdd = (firstParam, secondParam, thirdParam, memory, modes) => {
-  const firstValue = parseMode(modes[0], firstParam, memory);
-  const secondValue = parseMode(modes[1], secondParam, memory);
-  // console.log("Add params:", firstParam, secondParam, thirdParam);
-  // console.log("Values:", firstValue, secondValue);
-  // console.log("Setting index", thirdParam, "to", firstValue + secondValue);
-  memory[thirdParam] = (firstValue + secondValue).toString();
+const processAdd = (
+  firstParam,
+  secondParam,
+  thirdParam,
+  memory,
+  relativeBase,
+  modes
+) => {
+  const firstValue = parseMode(modes[0], firstParam, memory, relativeBase);
+  const secondValue = parseMode(modes[1], secondParam, memory, relativeBase);
+  if (log) {
+    console.log("Add params:", firstParam, secondParam, thirdParam);
+    console.log("Values:", firstValue, secondValue);
+    console.log("Setting index", thirdParam, "to", firstValue + secondValue);
+  }
+  memory[parseWriteMode(modes[2], thirdParam, relativeBase)] = (
+    firstValue + secondValue
+  ).toString();
   return 4;
 };
 
@@ -23,27 +63,38 @@ const processMultiply = (
   secondParam,
   thirdParam,
   memory,
+  relativeBase,
   modes
 ) => {
-  const firstValue = parseMode(modes[0], firstParam, memory);
-  const secondValue = parseMode(modes[1], secondParam, memory);
-  // console.log("Multiply params:", firstParam, secondParam, thirdParam);
-  // console.log("Values:", firstValue, secondValue);
-  // console.log("Setting index", thirdParam, "to", firstValue * secondValue);
-  memory[thirdParam] = (firstValue * secondValue).toString();
+  const firstValue = parseMode(modes[0], firstParam, memory, relativeBase);
+  const secondValue = parseMode(modes[1], secondParam, memory, relativeBase);
+  if (log) {
+    console.log("Multiply params:", firstParam, secondParam, thirdParam);
+    console.log("Values:", firstValue, secondValue);
+    console.log("Setting index", thirdParam, "to", firstValue * secondValue);
+  }
+  memory[parseWriteMode(modes[2], thirdParam, relativeBase)] = (
+    firstValue * secondValue
+  ).toString();
   return 4;
 };
 
 // takes a single integer as input and saves it to the position given by its only parameter.
-const processInput = (value, index, memory) => {
-  //console.log("Setting index", index, "to", value);
-  memory[index] = value;
+const processInput = (value, index, memory, mode, relativeBase) => {
+  if (log) {
+    console.log("Setting index", index, "to", value);
+  }
+  memory[parseWriteMode(mode, index, relativeBase)] = value;
   return 2;
 };
 
 // outputs the value of its only parameter.
-const processOutput = (param, memory, mode) => {
-  const output = parseMode(mode, param, memory);
+const processOutput = (param, memory, relativeBase, mode) => {
+  const output = parseMode(mode, param, memory, relativeBase);
+  if (log) {
+    console.log("Output param:", param);
+    console.log("Output mode:", mode);
+  }
   console.log("=====");
   console.log("Output:", output);
   console.log("=====");
@@ -51,36 +102,54 @@ const processOutput = (param, memory, mode) => {
 };
 
 // if the first parameter is non-zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
-const processJumpIfTrue = (firstParam, secondParam, memory, mode, pointer) => {
-  const newPointer = parseMode(mode[1], secondParam, memory);
-  const value = parseMode(mode[0], firstParam, memory);
+const processJumpIfTrue = (
+  firstParam,
+  secondParam,
+  memory,
+  relativeBase,
+  mode,
+  pointer
+) => {
+  const value = parseMode(mode[0], firstParam, memory, relativeBase);
+  const newPointer = parseMode(mode[1], secondParam, memory, relativeBase);
   const returnPointer = value !== 0 ? newPointer : pointer + 3;
-  // console.log(
-  //   "Jump if true params:",
-  //   firstParam,
-  //   secondParam,
-  //   "with pointer",
-  //   pointer
-  // );
-  //console.log("Value:", value, "NewPointer:", newPointer);
-  //console.log("Jumping to", returnPointer);
+  if (log) {
+    console.log(
+      "Jump if true params:",
+      firstParam,
+      secondParam,
+      "with pointer",
+      pointer
+    );
+    console.log("Value:", value, "NewPointer:", newPointer);
+    console.log("Jumping to", returnPointer);
+  }
   return returnPointer;
 };
 
 // if the first parameter is zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
-const processJumpIfFalse = (firstParam, secondParam, memory, mode, pointer) => {
-  const newPointer = parseMode(mode[1], secondParam, memory);
-  const value = parseMode(mode[0], firstParam, memory);
+const processJumpIfFalse = (
+  firstParam,
+  secondParam,
+  memory,
+  relativeBase,
+  mode,
+  pointer
+) => {
+  const newPointer = parseMode(mode[1], secondParam, memory, relativeBase);
+  const value = parseMode(mode[0], firstParam, memory, relativeBase);
   const returnPointer = value === 0 ? newPointer : pointer + 3;
-  // console.log(
-  //   "Jump if false params:",
-  //   firstParam,
-  //   secondParam,
-  //   "with pointer",
-  //   pointer
-  // );
-  //console.log("Value:", value, "NewPointer:", newPointer);
-  //console.log("Jumping to", returnPointer);
+  if (log) {
+    console.log(
+      "Jump if false params:",
+      firstParam,
+      secondParam,
+      "with pointer",
+      pointer
+    );
+    console.log("Value:", value, "NewPointer:", newPointer);
+    console.log("Jumping to", returnPointer);
+  }
   return returnPointer;
 };
 
@@ -90,26 +159,62 @@ const processLessThan = (
   secondParam,
   thirdParam,
   memory,
+  relativeBase,
   modes
 ) => {
-  const firstValue = parseMode(modes[0], firstParam, memory);
-  const secondValue = parseMode(modes[0], secondParam, memory);
-  memory[thirdParam] = firstValue < secondValue ? 1 : 0;
-  //console.log("Equals params:", firstParam, secondParam, thirdParam);
-  //console.log("Values:", firstValue, secondValue);
-  //console.log("Setting index", thirdParam, "to", memory[thirdParam]);
+  const firstValue = parseMode(modes[0], firstParam, memory, relativeBase);
+  const secondValue = parseMode(modes[1], secondParam, memory, relativeBase);
+  memory[parseWriteMode(modes[2], thirdParam, relativeBase)] =
+    firstValue < secondValue ? 1 : 0;
+  if (log) {
+    console.log("Less than params:", firstParam, secondParam, thirdParam);
+    console.log("Values:", firstValue, secondValue);
+    console.log(
+      "Setting index",
+      thirdParam,
+      "to",
+      memory[parseWriteMode(modes[2], thirdParam, relativeBase)]
+    );
+  }
   return 4;
 };
 
 // if the first parameter is equal to the second parameter, it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
-const processEquals = (firstParam, secondParam, thirdParam, memory, modes) => {
-  const firstValue = parseMode(modes[0], firstParam, memory);
-  const secondValue = parseMode(modes[1], secondParam, memory);
-  memory[thirdParam] = firstValue === secondValue ? 1 : 0;
-  //console.log("Equals params:", firstParam, secondParam, thirdParam);
-  //console.log("Values:", firstValue, secondValue);
-  //console.log("Setting index", thirdParam, "to", memory[thirdParam]);
+const processEquals = (
+  firstParam,
+  secondParam,
+  thirdParam,
+  memory,
+  relativeBase,
+  modes
+) => {
+  const firstValue = parseMode(modes[0], firstParam, memory, relativeBase);
+  const secondValue = parseMode(modes[1], secondParam, memory, relativeBase);
+  memory[parseWriteMode(modes[2], thirdParam, relativeBase)] =
+    firstValue === secondValue ? 1 : 0;
+  if (log) {
+    console.log("Equals params:", firstParam, secondParam, thirdParam);
+    console.log("Values:", firstValue, secondValue);
+    console.log(
+      "Setting index",
+      thirdParam,
+      "to",
+      memory[parseWriteMode(modes[2], thirdParam, relativeBase)]
+    );
+  }
   return 4;
+};
+
+// adjusts the relative base by the value of its only parameter.
+const processBaseChange = (param, memory, relativeBase, mode, pointer) => {
+  const value = parseMode(mode, param, memory, relativeBase);
+  if (log) {
+    console.log("Base change param:", param);
+    console.log("Current base:", relativeBase);
+    console.log("Base change mode:", mode);
+    console.log("Value:", value + relativeBase);
+  }
+  return [pointer + 2, relativeBase + value];
 };
 
 const isPosition = mode => mode === 0;
@@ -117,6 +222,8 @@ const isPosition = mode => mode === 0;
 const isImmediate = mode => mode === 1;
 
 const isRelative = mode => mode === 2;
+
+const isBaseChange = opcode => opcode === 9;
 
 const isEquals = opcode => opcode === 8;
 
@@ -135,6 +242,7 @@ const isAdd = opcode => opcode === 1;
 const isMultiply = opcode => opcode === 2;
 
 const parseOperation = operation => {
+  if (log) console.log(operation);
   const split = operation
     .split("")
     .map(o => parseInt(o))
@@ -147,20 +255,32 @@ const parseOperation = operation => {
   return parsed.reverse();
 };
 
-const run = (memory, systemID) => {
+const allocateMemory = array => {
+  let memory = [...array];
+  for (let i = 0; i < 34463338; i++) {
+    memory.push(0);
+  }
+  return memory;
+};
+
+const run = (input, systemID) => {
+  let memory = allocateMemory(input);
   let i = 0;
-  while (memory[i] != 99 || i >= memory.length) {
+  let relativeBase = 0;
+  while (memory[i] != 99) {
     unparsedOperation = memory[i];
     const operation = parseOperation(unparsedOperation);
-    // console.log("---------------");
-    // console.log(
-    //   "Operation on index:",
-    //   i,
-    //   "is",
-    //   `-${unparsedOperation}-`,
-    //   "==>",
-    //   operation
-    // );
+    if (log) {
+      console.log("---------------");
+      console.log(
+        "Operation on index:",
+        i,
+        "is",
+        `-${unparsedOperation}-`,
+        "==>",
+        operation
+      );
+    }
     const opcode = parseInt([operation[4], operation[5]].join(""));
     if (isAdd(opcode)) {
       i += processAdd(
@@ -168,6 +288,7 @@ const run = (memory, systemID) => {
         memory[i + 2],
         memory[i + 3],
         memory,
+        relativeBase,
         operation.slice(0, 3).reverse()
       );
     } else if (isMultiply(opcode)) {
@@ -176,17 +297,25 @@ const run = (memory, systemID) => {
         memory[i + 2],
         memory[i + 3],
         memory,
+        relativeBase,
         operation.slice(0, 3).reverse()
       );
     } else if (isInput(opcode)) {
-      i += processInput(systemID, memory[i + 1], memory);
+      i += processInput(
+        systemID,
+        memory[i + 1],
+        memory,
+        operation[2],
+        relativeBase
+      );
     } else if (isOutput(opcode)) {
-      i += processOutput(memory[i + 1], memory, operation[2]);
+      i += processOutput(memory[i + 1], memory, relativeBase, operation[2]);
     } else if (isJumpIfTrue(opcode)) {
       i = processJumpIfTrue(
         memory[i + 1],
         memory[i + 2],
         memory,
+        relativeBase,
         operation.slice(0, 3).reverse(),
         i
       );
@@ -195,6 +324,7 @@ const run = (memory, systemID) => {
         memory[i + 1],
         memory[i + 2],
         memory,
+        relativeBase,
         operation.slice(0, 3).reverse(),
         i
       );
@@ -204,6 +334,7 @@ const run = (memory, systemID) => {
         memory[i + 2],
         memory[i + 3],
         memory,
+        relativeBase,
         operation.slice(0, 3).reverse()
       );
     } else if (isEquals(opcode)) {
@@ -212,14 +343,22 @@ const run = (memory, systemID) => {
         memory[i + 2],
         memory[i + 3],
         memory,
+        relativeBase,
         operation.slice(0, 3).reverse()
+      );
+    } else if (isBaseChange(opcode)) {
+      [i, relativeBase] = processBaseChange(
+        memory[i + 1],
+        memory,
+        relativeBase,
+        operation[2],
+        i
       );
     } else {
       console.log("Invalid OPCODE:", opcode);
       return;
     }
   }
-  return memory[0];
 };
 
 exports.run = run;

@@ -57,7 +57,7 @@ const decodeLayers = (layers, height, width) => {
         const layer = layers[layerIndex];
         const pixel = layer[i][j];
         if (pixel !== 2) {
-          decoded[i][j] = pixel === 1 ? "X" : " ";
+          decoded[i][j] = pixel === 1 ? "0" : " ";
           break;
         }
       }
