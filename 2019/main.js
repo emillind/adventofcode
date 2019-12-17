@@ -8,3 +8,5 @@ require("./solutions/7");
 require("./solutions/8");
 require("./solutions/9");
 require("./solutions/10");
+require("./solutions/11");
+require("./solutions/12");
