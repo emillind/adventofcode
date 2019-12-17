@@ -42,11 +42,11 @@ const move = (x, y, dir) => {
   }
 };
 
-const calculatePaintArea = memory => {
+const calculatePaintArea = (memory, initialPaint) => {
   let currentDirection = "N";
   let currentX = 0;
   let currentY = 0;
-  let painted = [{ x: 0, y: 0, color: 1 }];
+  let painted = initialPaint;
 
   const turnAndMove = input => {
     if (input === 0) {
@@ -69,7 +69,7 @@ const calculatePaintArea = memory => {
     else return 0;
   };
 
-  run(memory, 1, turnAndMove, paint, getColor);
+  run(memory, 1, getColor, paint, turnAndMove);
 
   return painted;
 };
@@ -88,23 +88,6 @@ const findHighestValue = (painted, axis) => {
     if (paint[axis] > highest) highest = paint[axis];
   }
   return highest;
-};
-
-const setValue = (row, col, value, grid) => {
-  if (grid.length <= row) {
-    let newRow = [];
-    newRow[col] = value;
-    for (let i = 0; i < col; i++) {
-      if (newRow[i] === undefined) newRow[i] = " ";
-    }
-    grid[row] = newRow;
-    // Fill with empty rows
-    for (let i = 0; i < grid.length; i++) {
-      if (grid[i] === undefined) grid[i] = [];
-    }
-  } else {
-    grid[row][col] = value;
-  }
 };
 
 const offsetField = (painted, lowestX, lowestY, highestX, highestY) => {
@@ -126,7 +109,7 @@ const offsetField = (painted, lowestX, lowestY, highestX, highestY) => {
   });
   //let field = [];
   offset.forEach(p => {
-    field[p.y][p.x] = p.color === 0 ? " " : "0";
+    field[p.y][p.x] = p.color === 0 ? " " : "O";
   });
   return field;
 };
@@ -138,13 +121,15 @@ const parseAnswer = image => {
 };
 
 const firstTask = () => {
-  const ans = calculatePaintArea([...puzzleInput]);
+  const ans = calculatePaintArea([...puzzleInput], []);
   return ans.length;
 };
 
 const secondTask = () => {
-  const painted = calculatePaintArea([...puzzleInput]);
-  console.log(painted);
+  const painted = calculatePaintArea(
+    [...puzzleInput],
+    [{ x: 0, y: 0, color: 1 }]
+  );
   const lowestX = findLowestValue(painted, "x");
   const highestX = findHighestValue(painted, "x") + lowestX;
   const lowestY = findLowestValue(painted, "y");

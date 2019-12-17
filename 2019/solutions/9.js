@@ -4,14 +4,12 @@ const inputString = fs.readFileSync("inputs/9.txt").toString();
 const puzzleInput = inputString.split(",");
 
 const firstTask = () => {
-  let ans = "";
-  run([...puzzleInput], 1);
+  const ans = run([...puzzleInput], 1);
   return ans;
 };
 
 const secondTask = () => {
-  let ans = "";
-  run([...puzzleInput], 2);
+  const ans = run([...puzzleInput], 2);
   return ans;
 };
 
@@ -24,7 +22,7 @@ const main = () => {
     `${start.getHours()}:${start.getMinutes()}:${start.getSeconds()}:${start.getMilliseconds()}`
   );
 
-  console.log("Answer: Last output", firstTask());
+  console.log("Answer:", firstTask());
 
   let end = new Date();
   console.log(
@@ -41,7 +39,7 @@ const main = () => {
     `${start.getHours()}:${start.getMinutes()}:${start.getSeconds()}:${start.getMilliseconds()}`
   );
 
-  console.log("Answer: Last output", secondTask());
+  console.log("Answer:", secondTask());
 
   end = new Date();
   console.log(
