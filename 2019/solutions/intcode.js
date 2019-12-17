@@ -262,7 +262,15 @@ const allocateMemory = array => {
   return array;
 };
 
-const run = (input, systemID, turn, paint, getColor) => {
+const run = (
+  input,
+  systemID,
+  getInput,
+  reset,
+  firstOutput,
+  secondOutput,
+  thirdOutput
+) => {
   let memory = allocateMemory(input);
   let i = 0;
   let relativeBase = 0;
@@ -301,9 +309,9 @@ const run = (input, systemID, turn, paint, getColor) => {
         operation.slice(0, 3).reverse()
       );
     } else if (isInput(opcode)) {
-      if (getColor) {
+      if (getInput) {
         i += processInput(
-          getColor(),
+          getInput(),
           memory[i + 1],
           memory,
           operation[2],
@@ -326,10 +334,17 @@ const run = (input, systemID, turn, paint, getColor) => {
         operation[2]
       );
       outputs.push(output);
-      if (paint && outputs.length === 1) paint(output);
-      if (turn && outputs.length === 2) {
-        turn(output);
-        outputs = [];
+      if (firstOutput && outputs.length === 1) {
+        firstOutput(output);
+        if (reset === 1) outputs = [];
+      }
+      if (secondOutput && outputs.length === 2) {
+        secondOutput(output);
+        if (reset === 2) outputs = [];
+      }
+      if (thirdOutput && outputs.length === 3) {
+        thirdOutput(output);
+        if (reset === 3) outputs = [];
       }
       i += add;
     } else if (isJumpIfTrue(opcode)) {

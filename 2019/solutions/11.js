@@ -69,7 +69,7 @@ const calculatePaintArea = (memory, initialPaint) => {
     else return 0;
   };
 
-  run(memory, 1, getColor, paint, turnAndMove);
+  run(memory, 1, getColor, 2, paint, turnAndMove);
 
   return painted;
 };
