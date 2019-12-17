@@ -95,10 +95,10 @@ const processOutput = (param, memory, relativeBase, mode) => {
     console.log("Output param:", param);
     console.log("Output mode:", mode);
   }
-  console.log("=====");
-  console.log("Output:", output);
-  console.log("=====");
-  return 2;
+  // console.log("=====");
+  // console.log("Output:", output);
+  // console.log("=====");
+  return [2, output];
 };
 
 // if the first parameter is non-zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
@@ -256,17 +256,17 @@ const parseOperation = operation => {
 };
 
 const allocateMemory = array => {
-  let memory = [...array];
   for (let i = 0; i < 34463338; i++) {
-    memory.push(0);
+    array.push(0);
   }
-  return memory;
+  return array;
 };
 
-const run = (input, systemID) => {
+const run = (input, systemID, turn, paint, getColor) => {
   let memory = allocateMemory(input);
   let i = 0;
   let relativeBase = 0;
+  let outputs = [];
   while (memory[i] != 99) {
     unparsedOperation = memory[i];
     const operation = parseOperation(unparsedOperation);
@@ -301,15 +301,37 @@ const run = (input, systemID) => {
         operation.slice(0, 3).reverse()
       );
     } else if (isInput(opcode)) {
-      i += processInput(
-        systemID,
+      if (getColor) {
+        i += processInput(
+          getColor(),
+          memory[i + 1],
+          memory,
+          operation[2],
+          relativeBase
+        );
+      } else {
+        i += processInput(
+          systemID,
+          memory[i + 1],
+          memory,
+          operation[2],
+          relativeBase
+        );
+      }
+    } else if (isOutput(opcode)) {
+      const [add, output] = processOutput(
         memory[i + 1],
         memory,
-        operation[2],
-        relativeBase
+        relativeBase,
+        operation[2]
       );
-    } else if (isOutput(opcode)) {
-      i += processOutput(memory[i + 1], memory, relativeBase, operation[2]);
+      outputs.push(output);
+      if (paint && outputs.length === 1) paint(output);
+      if (turn && outputs.length === 2) {
+        turn(output);
+        outputs = [];
+      }
+      i += add;
     } else if (isJumpIfTrue(opcode)) {
       i = processJumpIfTrue(
         memory[i + 1],
@@ -359,6 +381,7 @@ const run = (input, systemID) => {
       return;
     }
   }
+  return outputs[outputs.length - 1];
 };
 
 exports.run = run;

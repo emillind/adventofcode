@@ -4,16 +4,14 @@ const inputString = fs.readFileSync("inputs/5.txt").toString();
 const puzzleInput = inputString.split(",");
 
 const firstTask = () => {
-  let ans = "Last output";
   const memory = [...puzzleInput];
-  run(memory, 1);
+  const ans = run(memory, 1);
   return ans;
 };
 
 const secondTask = () => {
-  let ans = "Last output";
   const memory = [...puzzleInput];
-  run(memory, 5);
+  const ans = run(memory, 5);
   return ans;
 };
 
