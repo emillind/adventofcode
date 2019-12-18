@@ -10,3 +10,4 @@ require("./solutions/9");
 require("./solutions/10");
 require("./solutions/11");
 require("./solutions/12");
+require("./solutions/13");
