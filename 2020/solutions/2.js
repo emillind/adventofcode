@@ -7,20 +7,19 @@ const arr = inputString.split('\n').map((val) => {
     firstNumber: range[0],
     secondNumber: range[1],
     letter: split[1].substr(0, 1),
-    password: split[2],
+    password: split[2].split(''),
   }
 })
 
 const isValidOne = (least, most, letter, password) => {
-  const amountOfLetters = password.split('').filter((it) => it === letter).length
+  const amountOfLetters = password.filter((it) => it === letter).length
   return amountOfLetters <= most && amountOfLetters >= least
 }
 
 const isValidTwo = (firstIndex, secondIndex, letter, password) => {
-  const passwordArray = password.split('')
   return (
-    (passwordArray[firstIndex] === letter && passwordArray[secondIndex] !== letter) ||
-    (passwordArray[secondIndex] === letter && passwordArray[firstIndex] !== letter)
+    (password[firstIndex] === letter && password[secondIndex] !== letter) ||
+    (password[secondIndex] === letter && password[firstIndex] !== letter)
   )
 }
 
