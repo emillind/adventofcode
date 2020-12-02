@@ -25,19 +25,17 @@ const isValidTwo = (firstIndex, secondIndex, letter, password) => {
 }
 
 const firstTask = () => {
-  const ans = arr.reduce(
+  return arr.reduce(
     (a, b) => a + (isValidOne(b.firstNumber, b.secondNumber, b.letter, b.password) ? 1 : 0),
     0
   )
-  return ans
 }
 
 const secondTask = () => {
-  const ans = arr.reduce(
+  return arr.reduce(
     (a, b) => a + (isValidTwo(b.firstNumber - 1, b.secondNumber - 1, b.letter, b.password) ? 1 : 0),
     0
   )
-  return ans
 }
 
 const main = () => {
