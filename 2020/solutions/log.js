@@ -37,10 +37,10 @@ const toTimeString = (date) => {
   )}:${tryPrependZero(date.getMilliseconds())}`
 }
 
-const runTask = (func, task) => {
+const runTask = (func, input, task) => {
   const start = new Date()
   execute(start)
-  answer(func())
+  answer(func(input))
   const end = new Date()
   finish(start, end, task)
 }
