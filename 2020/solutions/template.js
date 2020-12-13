@@ -1,5 +1,4 @@
 const fs = require('fs')
-const { parse } = require('path')
 const log = require('./log.js')
 
 const parseInput = () => {
