@@ -52,7 +52,7 @@ const secondTask = (input) => {
 
 const main = () => {
   const parsedInput = parseInput()
-  log.start('X')
+  log.start('2')
   log.runTask(firstTask, parsedInput, 1)
   console.log('-------------------')
   log.runTask(secondTask, parsedInput, 2)
