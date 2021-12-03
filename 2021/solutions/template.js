@@ -2,17 +2,17 @@ const fs = require('fs')
 const log = require('./log.js')
 
 const parseInput = () => {
-  const inputString = fs.readFileSync('inputs/X.txt').toString()
+  const inputString = fs.readFileSync('../inputs/X.txt').toString()
   return inputString.split('\n').map((val) => val)
 }
 
 const firstTask = (input) => {
-  let ans = ''
+  const ans = ''
   return ans
 }
 
 const secondTask = (input) => {
-  let ans = ''
+  const ans = ''
   return ans
 }
 
