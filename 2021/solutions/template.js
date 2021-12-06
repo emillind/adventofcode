@@ -19,9 +19,9 @@ const secondTask = (input) => {
 const main = () => {
   const parsedInput = parseInput()
   log.start('X')
-  log.runTask(firstTask, parsedInput, 1)
+  log.runTask(firstTask, parsedInput.slice(), 1)
   console.log('-------------------')
-  log.runTask(secondTask, parsedInput, 2)
+  log.runTask(secondTask, parsedInput.slice(), 2)
   log.end()
 }
 
