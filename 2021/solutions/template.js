@@ -3,7 +3,7 @@ const log = require('./log.js')
 
 const parseInput = () => {
   const inputString = fs.readFileSync('../inputs/X.txt').toString()
-  return inputString.split('\n').map((val) => val)
+  return inputString.split('\n').map((it) => it)
 }
 
 const firstTask = (input) => {
