@@ -8,15 +8,12 @@ const parseInput = (file) => {
   return inputString.split('\n').map((val) => parseInt(val))
 }
 
-const caloriesPerElf = (array) => {
-  return array
+const sortedCaloriesPerElf = (input) => {
+  return input
     .reduce(
       (calories, current) => {
-        if (!isNaN(current)) {
-          calories[calories.length - 1] += current
-        } else {
-          calories.push(0)
-        }
+        if (isNaN(current)) calories.push(0)
+        else calories[calories.length - 1] += current
         return calories
       },
       [0]
@@ -25,11 +22,11 @@ const caloriesPerElf = (array) => {
 }
 
 const firstTask = (input) => {
-  return caloriesPerElf(input)[0]
+  return sortedCaloriesPerElf(input)[0]
 }
 
 const secondTask = (input) => {
-  const calories = caloriesPerElf(input)
+  const calories = sortedCaloriesPerElf(input)
   return calories[0] + calories[1] + calories[2]
 }
 
