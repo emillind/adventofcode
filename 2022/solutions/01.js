@@ -36,7 +36,6 @@ const secondTask = (input) => {
 const main = () => {
   const testInput = parseInput('test', DAY)
   const parsedInput = parseInput('input', DAY)
-  console.log(testInput)
   log.start(DAY)
   log.runTask(firstTask, parsedInput, 1)
   console.log('-------------------')
