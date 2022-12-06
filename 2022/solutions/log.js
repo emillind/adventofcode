@@ -7,8 +7,8 @@ const end = () => {
   console.log()
 }
 
-const execute = (start) => {
-  console.log('Executing second task at', toTimeString(start))
+const execute = (start, task) => {
+  console.log(`Executing task ${task} at ${toTimeString(start)}`)
 }
 
 const finish = (start, end, task) => {
@@ -32,14 +32,16 @@ const tryPrependZero = (value) => {
 }
 
 const toTimeString = (date) => {
-  return `${tryPrependZero(date.getHours())}:${tryPrependZero(date.getMinutes())}:${tryPrependZero(
-    date.getSeconds()
-  )}:${tryPrependZero(date.getMilliseconds())}`
+  return `${tryPrependZero(date.getHours())}:${tryPrependZero(
+    date.getMinutes()
+  )}:${tryPrependZero(date.getSeconds())}:${tryPrependZero(
+    date.getMilliseconds()
+  )}`
 }
 
 const runTask = (func, input, task) => {
   const start = new Date()
-  execute(start)
+  execute(start, task)
   answer(func(input))
   const end = new Date()
   finish(start, end, task)
