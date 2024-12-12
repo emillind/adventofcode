@@ -24,33 +24,59 @@ const getStartPosition = (matrix) => {
   }
 };
 
+const turn = (dirs) => {
+  if (dirs == up) return right;
+  else if (dirs == right) return down;
+  else if (dirs == down) return left;
+  else if (dirs == left) return up;
+};
+
 const calculateGuardPath = (matrix) => {
-  const obstaclesHit = [];
   const pos = getStartPosition(matrix);
+  const startPos = { x: pos.x, y: pos.y };
+  const visited = {};
+  const obstacles = new Set();
   let dirs = up;
   while (
     matrix[pos.y + 1 * dirs[0]] &&
     matrix[pos.y + 1 * dirs[0]][pos.x + 1 * dirs[1]]
   ) {
-    const nextPos = matrix[pos.y + 1 * dirs[0]][pos.x + 1 * dirs[1]];
-    if (nextPos === OBSTACLE) {
-      const next = { a: pos.y + 1 * dirs[0], b: pos.x + 1 * dirs[1] };
-      if (!obstaclesHit.find((it) => it.a === next.a && next.b === it.b)) {
-        obstaclesHit.push(next);
+    const nextPos = { x: pos.x + 1 * dirs[1], y: pos.y + 1 * dirs[0] };
+    const visitedKey = `${pos.y},${pos.x}`;
+    if (matrix[nextPos.y][nextPos.x] === OBSTACLE) {
+      if (visited[visitedKey]) visited[visitedKey].push(dirs);
+      else visited[visitedKey] = [dirs];
+      dirs = turn(dirs);
+    } else {
+      const simulatedTurn = turn(dirs);
+      const simulatedPos = {
+        y: pos.y + 1 * simulatedTurn[0],
+        x: pos.x + 1 * simulatedTurn[1],
+      };
+      while (
+        matrix[simulatedPos.y] &&
+        matrix[simulatedPos.y][simulatedPos.x] &&
+        matrix[simulatedPos.y][simulatedPos.x] !== OBSTACLE
+      ) {
+        const simulatedKey = `${simulatedPos.y},${simulatedPos.x}`;
+        if (
+          visited[simulatedKey] &&
+          visited[simulatedKey].includes(simulatedTurn)
+        ) {
+          obstacles.add(nextPos);
+        }
+        simulatedPos.x += 1 * simulatedTurn[1];
+        simulatedPos.y += 1 * simulatedTurn[0];
       }
-      // x: 0 -> 1 -> 0 -> -1 -> 0
-      // y: -1 -> 0 -> 1 -> 0 -> -1
-      if (dirs == up) dirs = right;
-      else if (dirs == right) dirs = down;
-      else if (dirs == down) dirs = left;
-      else if (dirs == left) dirs = up;
     }
     matrix[pos.y][pos.x] = VISITED;
+    if (visited[visitedKey]) visited[visitedKey].push(dirs);
+    else visited[visitedKey] = [dirs];
     pos.x += 1 * dirs[1];
     pos.y += 1 * dirs[0];
   }
   matrix[pos.y][pos.x] = VISITED;
-  return obstaclesHit;
+  return obstacles;
 };
 
 const countVisited = (matrix) => {
@@ -61,72 +87,24 @@ const countVisited = (matrix) => {
   );
 };
 
-// 6,3 - 7,6 - 7,7 - 8,1 - 8,3 - 9,7
-
-// 6,3
-// 7,7
-// 7,6
-// 8,1
-// 8,3 - saknas, följer inte mönstret
-// 9,7
-//
-// 4,9 - ska inte vara med - har ett hinder i sig
-
-const findLoopSpots = (matrix, obstacles) => {
-  const spots = [];
-  obstacles.forEach(({ a, b }) => {
-    for (let m = 2; m < obstacles.length; m++) {
-      for (let n = 2; n < obstacles.length; n++) {
-        const ne = obstacles.find((o) => o.a === a + 1 && o.b === b + n);
-        const se = obstacles.find((o) => o.a === a + m && o.b === b + n - 1);
-        const sw = obstacles.find((o) => o.a === a + m - 1 && o.b === b - 1);
-        if ((ne && se) || (ne && sw) || (se && sw))
-          console.log('(', a, b, ')', ne, se, sw);
-        if (ne && se) {
-          console.log('adding', { y: a + m - 1, x: b - 1 });
-          spots.push({ y: a + m - 1, x: b - 1 });
-        }
-        if (ne && sw) {
-          console.log('adding', { y: a + m, x: b + n - 1 });
-          spots.push({ y: a + m, x: b + n - 1 });
-        }
-        if (sw && se) {
-          console.log('adding', { y: a + 1, x: b + n });
-          spots.push({ y: a + 1, x: b + n });
-        }
-      }
-    }
-  });
-  return spots;
-};
-
-const validateLoop = () => {
-  // TODO
-  return true;
-};
-
 const firstTask = (matrix) => {
   return countVisited(matrix);
 };
 
-const secondTask = ({ matrix, obstaclesHit }) => {
-  console.log(matrix.map((it) => it.join('')).join('\n'));
-  console.log(obstaclesHit);
-  const possibleLoops = findLoopSpots(matrix, obstaclesHit).filter(
-    validateLoop
-  );
-  console.log(possibleLoops);
-  return possibleLoops.length;
+const secondTask = (obstacles) => {
+  console.log(obstacles);
+  return obstacles.size;
 };
 
 const main = () => {
   const testInput = parseInput('test', DAY);
   const parsedInput = parseInput('input', DAY);
-  const obstaclesHit = calculateGuardPath(testInput);
+  const testRes = calculateGuardPath(testInput);
+  const res = calculateGuardPath(parsedInput);
   log.start(DAY);
-  log.runTask(firstTask, parsedInput, 1);
+  log.runTask(firstTask, testInput, 1);
   console.log('-------------------');
-  log.runTask(secondTask, { matrix: testInput, obstaclesHit }, 2);
+  log.runTask(secondTask, res, 2);
   log.end();
 };
 
